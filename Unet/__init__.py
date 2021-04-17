@@ -1,1 +1,2 @@
-# for further usage 
+from .model import U_net
+
