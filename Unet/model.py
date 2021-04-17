@@ -44,10 +44,10 @@ class Conv_Layer(nn.Module):
 
         self.convolution = nn.Sequential(
                 nn.Conv2d(in_channel, mid, kernel_size=3, padding=1),
-                nn.batchNorm2d(mid),
+                nn.BatchNorm2d(mid),
                 nn.ReLU(inplace=True),
                 nn.Conv2d(mid, out_channel, kernel_size=3, padding=1),
-                nn.batchNorm2d(out_channel),
+                nn.BatchNorm2d(out_channel),
                 nn.ReLU(inplace=True))
 
     def forward(self, tou):
@@ -59,7 +59,7 @@ class Down_Sampling(nn.Module):
 
         self.Down = nn.Sequential(
                 nn.MaxPool2d(2),
-                Conv_layer(in_channel, out_channel))
+                Conv_Layer(in_channel, out_channel))
 
     def forward(self, tou):
         return self.Down(tou)
@@ -69,8 +69,8 @@ class Up_Sampling(nn.Module):
         super(Up_Sampling, self).__init__()
 
         if bilinear:
-           self.up = nn.Upsample(scale_factor=2, mode="bilinear", allign_corners=True)
-           self.conv = Conv_layer(in_channel, out_channel, in_channel // 2)
+           self.up = nn.Upsample(scale_factor=2, mode="bilinear", align_corners=True)
+           self.conv = Conv_Layer(in_channel, out_channel, in_channel // 2)
 
         else:
             self.up = nn.ConvTranspose2d(in_channel, in_channel // 2, kernel_size=2, stride=2)
