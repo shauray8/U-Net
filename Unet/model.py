@@ -37,8 +37,8 @@ class U_net(nn.Module):
 
 
 class Conv_Layer(nn.Module):
-    def __init__(self, in_channel, out_channel, mid):
-        super(Conv_layer, self).__init__()
+    def __init__(self, in_channel, out_channel, mid = None):
+        super(Conv_Layer, self).__init__()
         if not mid:
             mid = out_channel
 
@@ -61,7 +61,7 @@ class Down_Sampling(nn.Module):
                 nn.MaxPool2d(2),
                 Conv_layer(in_channel, out_channel))
 
-    def forward(self, tou)
+    def forward(self, tou):
         return self.Down(tou)
 
 class Up_Sampling(nn.Module):
@@ -100,6 +100,6 @@ class Out_Conv(nn.Module):
 
 
 if __name__ == "__main__":
-    Unet = U_net()
+    Unet = U_net(1,2)
     print(Unet)
 
