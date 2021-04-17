@@ -4,10 +4,37 @@ import torch.nn.functional as F
 
 
 class U_net(nn.Module):
-    def __init__(self):
+    def __init__(self, n_channel, n_classes, bilinear=True):
         super(U_net, self).__init__()
         
-        self.ini = Conv_Layer
+        self.ini = Conv_Layer(n_channel, 64)
+        self.downSam1 = Down_Sampling(64, 128)
+        self.downSam2 = Down_Sampling(128, 256)
+        self.downSam3 = Down_Sampling(256, 512)
+
+        factor = 2 if bilinear else 1
+
+        self.downSam4 = Down_Sampling(512, 1024 // factor)
+        self.upSam1 = Up_Sampling(1024, 512 // factor, bilinear)
+        self.upSam2 = Up_Sampling(512, 256 // factor, bilinear)
+        self.upSam3 = Up_Sampling(256, 128 // factor, bilinear)
+        self.upSam4 = Up_Sampling(128, 64, bilinear)
+        
+        self.output = Out_Conv(64, n_classes)
+
+    def forward(self, x):
+        x1 = self.ini(x)
+        x2 = self.downsam1(x1)
+        x3 = self.downsam2(x2)
+        x4 = self.downsam3(x3)
+        x5 = self.downsam4(x4)
+        x = self.upsam1(x5, x4)
+        x = self.upsam2(x, x3)
+        x = self.upsam3(x, x2)
+        x = self.upsam4(x, x1)
+        gamma = self.output(x)
+        return gamma
+
 
 class Conv_Layer(nn.Module):
     def __init__(self, in_channel, out_channel, mid):
