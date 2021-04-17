@@ -6,11 +6,12 @@ import torch.nn.functional as F
 class U_net(nn.Module):
     def __init__(self):
         super(U_net, self).__init__()
-        self.model = []
-        pass
+        
+        self.ini = Conv_Layer
 
-
-    def Conv_layer(self, in_channel, out_channel, mid):
+class Conv_Layer(nn.Module):
+    def __init__(self, in_channel, out_channel, mid):
+        super(Conv_layer, self).__init__()
         if not mid:
             mid = out_channel
 
@@ -22,16 +23,52 @@ class U_net(nn.Module):
                 nn.batchNorm2d(out_channel),
                 nn.ReLU(inplace=True))
 
-        return self.convolution
+    def forward(self, tou):
+        return self.convolution(tou)
 
-    def Down_Sampling(self, in_channel, out_channel):
+class Down_Sampling(nn.Module):
+    def __init__(self, in_channel, out_channel):
+        super(Down_Sampling, self).__init__()
+
         self.Down = nn.Sequential(
                 nn.MaxPool2d(2),
                 Conv_layer(in_channel, out_channel))
 
-        return self.Down
+    def forward(self, tou)
+        return self.Down(tou)
 
-    
+class Up_Sampling(nn.Module):
+    def __init__(self, in_channel, out_channel, bilinear = True):
+        super(Up_Sampling, self).__init__()
+
+        if bilinear:
+           self.up = nn.Upsample(scale_factor=2, mode="bilinear", allign_corners=True)
+           self.conv = Conv_layer(in_channel, out_channel, in_channel // 2)
+
+        else:
+            self.up = nn.ConvTranspose2d(in_channel, in_channel // 2, kernel_size=2, stride=2)
+            self.conv = Double_conv(in_channel, out_channel)
+        
+    def forward(self,alpha, beta):
+        alpha = self.up(alpha)
+
+        diffY = beta.size()[2] - alpha.size()[2]
+        diffX = beta.size()[3] - alpha.size()[3]
+
+        alpha = F.pad(alpha, [diffX // 2, diffX - diffX // 2,
+                diffY // 2, diffY - diffY // 2])
+
+        x = torch.cat([alpha, beta],  dim=1)
+
+        return self.cov(x)
+
+class Out_Conv(nn.Module):
+    def __init__(self, in_channel, out_channel):
+        super(Out_Conv, self).__init__()
+        self.conv = nn.Conv2d(in_channel, out_channel, kernel_size=1)
+
+    def forward(self, tou):
+        return self.conv(tou)
 
 
 
