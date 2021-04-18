@@ -14,9 +14,9 @@ from utils import *
 
 
 # TBD
-img_dir = ""
-mask_dir = ""
-checkpoints = ""
+img_dir = "../../data/BrainMRI"
+mask_dir = "../../data/BrainMri"
+checkpoints = "./pretrained"
 
 
 def Train_this_mf(net, device, epochs, batch_size, lr, val_per=.1, save_cp=True, img_scale=.5):
