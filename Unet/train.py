@@ -33,6 +33,18 @@ def Train_this_mf(net, device, epochs, batch_size, lr, val_per=.1, save_cp=True,
     validation_loader = DataLoader(val, batch_size=batch_size, shuffle=False, num_workers=8,
             pin_memory=True, drop_last=True)
 
+    writer = SummaryWriter(comment=f"LR{lr_BS_{batch_size}_SCALE_{img_scale}}")
+    global_step = 0
+
+    logging.info(f'''Starting training:
+        Epochs:          {epochs}
+        Batch size:      {batch_size}
+        Learning rate:   {lr}
+        Training size:   {train_set}
+        Validation size: {val_Set}
+        Checkpoints:     {save_cp}
+        Device:          {device.type}
+        Images scaling:  {img_scale} ''')
 
 
 

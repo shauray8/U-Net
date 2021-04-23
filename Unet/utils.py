@@ -23,6 +23,13 @@ import matplotlib.pyplot as plt
 #    def __getitem__(self, i):
 #        pass
 
+#logging.basicConfig(filename="newfile.log",
+#                    format='%(asctime)s %(message)s',
+#                    filemode='w')
+#
+#logger = logging.getLogger()
+#logger.setLevel(logging.DEBUG)
+
 class corona_dataset(Dataset):
     def __init__(self, imgs_dir, masks_dir, scale=1):
         self.imags_dir = imgs_dir
@@ -36,7 +43,8 @@ class corona_dataset(Dataset):
         
         
         print(len(self.ids))
-        logging.info(f"Createing dataset with {len(self.ids)} example")
+        #logger.info(f"Createing dataset with {len(self.ids)} example")
+        print(f"Createing dataset with {len(self.ids)} example : ")
 
     def __len__(self):
         return len(self.ids)
