@@ -13,13 +13,26 @@ from torch.utils.data import DataLoader, random_split
 from utils import *
 
 
-# TBD
-img_dir = "../../data/BrainMRI"
-mask_dir = "../../data/BrainMri"
+imgs = "../../data/covid19_chest_xray/images/"
+mask = "../../data/covid19_chest_xray/mask/"
 checkpoints = "./pretrained"
 
 
 def Train_this_mf(net, device, epochs, batch_size, lr, val_per=.1, save_cp=True, img_scale=.5):
 
-    dataset = corona()
+    dataset = corona_dataset(dir_image, dir_mask, img_scale)
+
+    # train validation split
+    val_set = int(len(dataset) * val_per)
+    train_set = len(dataset) - val_set
+    train, val = random_split(dataset, [train_set, val_set])
+    
+    # loading the data
+    train_loader = DataLoader(train, batch_size=batch_size, shuffle=True, num_workers=8,
+            pin_memory=True)
+    validation_loader = DataLoader(val, batch_size=batch_size, shuffle=False, num_workers=8,
+            pin_memory=True, drop_last=True)
+
+
+
 
