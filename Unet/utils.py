@@ -49,6 +49,7 @@ class corona_dataset(Dataset):
     def __len__(self):
         return len(self.ids)
 
+    @classmethod
     def preprocess(cls, pil_image, scale):
         w, h = pil_image.size
         newW, newH = int(scale * w), int(scale * h)
