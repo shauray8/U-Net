@@ -23,13 +23,6 @@ import matplotlib.pyplot as plt
 #    def __getitem__(self, i):
 #        pass
 
-#logging.basicConfig(filename="newfile.log",
-#                    format='%(asctime)s %(message)s',
-#                    filemode='w')
-#
-#logger = logging.getLogger()
-#logger.setLevel(logging.DEBUG)
-
 class corona_dataset(Dataset):
     def __init__(self, imgs_dir, masks_dir, scale=1, transform):
         self.imags_dir = imgs_dir
@@ -43,7 +36,7 @@ class corona_dataset(Dataset):
         
         
         print(len(self.ids))
-        #logger.info(f"Createing dataset with {len(self.ids)} example")
+        logger.info(f"Createing dataset with {len(self.ids)} example")
         print(f"Createing dataset with {len(self.ids)} example : ")
 
     def __len__(self):
@@ -64,6 +57,7 @@ class corona_dataset(Dataset):
         if img_Trans.max() > 1:
             img_trans = img_trans / 255
 
+        
         return img_trans
 
     def __getitem__(self, i):
@@ -81,9 +75,11 @@ class corona_dataset(Dataset):
         assert img.size == mask.size, \
             f'Image and mask {idx} should be the same size, but are {img.size} and {mask.size}'
 
+        print("dataset preprocessing")
         img = self.preprocess(img, self.scale)
         mask = self.preprocess(mask, self.scale)
-
+        logger.info('dataset preprocessing')
+        
         return {
             'image': self.transform(torch.from_numpy(img).type(torch.FloatTensor)),
             'mask': self.transform(torch.from_numpy(mask).type(torch.FloatTensor))

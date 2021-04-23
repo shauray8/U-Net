@@ -62,6 +62,17 @@ def Train_this_mf(net, device, epochs, batch_size, lr, val_per=.1, save_cp=True,
         Device:          {device.type}
         Images scaling:  {img_scale} ''')
 
+    logging.info(f'''Starting training:
+        Net:             {net}       
+        Epochs:          {epochs}
+        Batch size:      {batch_size}
+        Learning rate:   {lr}
+        Training size:   {train_set}
+        Validation size: {val_Set}
+        Checkpoints:     {save_cp}
+        Device:          {device.type}
+        Images scaling:  {img_scale} ''')
+
     
     for epoch in (l := trange(epochs)):
         net.train()
@@ -109,9 +120,11 @@ def Train_this_mf(net, device, epochs, batch_size, lr, val_per=.1, save_cp=True,
 
 
                     if net.n_classes > 1:
+                        print('Validation cross entropy: {}'.format(val_score))
                         logging.info('Validation cross entropy: {}'.format(val_score))
                         writer.add_scalar('Loss/test', val_score, global_step)
                     else:
+                        print('Validation Dice Coeff: {}'.format(val_score))
                         logging.info('Validation Dice Coeff: {}'.format(val_score))
                         writer.add_scalar('Dice/test', val_score, global_step)
 
@@ -124,11 +137,13 @@ def Train_this_mf(net, device, epochs, batch_size, lr, val_per=.1, save_cp=True,
             if save_cp:
                 try:
                     os.mkdir(dir_checkpoint)
+                    print('Created checkpoint directory')
                     logging.info('Created checkpoint directory')
                 except OSError:
                     pass
                 torch.save(net.state_dict(),
                        dir_checkpoint + f'CP_epoch{epoch + 1}.pth')
+                logging.info(f'Checkpoint {epoch + 1} saved !')
                 print(f'Checkpoint {epoch + 1} saved !')
 
     writer.close()
