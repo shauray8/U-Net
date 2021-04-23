@@ -27,6 +27,7 @@ class corona_dataset(Dataset):
     def __init__(self, imgs_dir, masks_dir, scale=1, transform):
         self.imags_dir = imgs_dir
         self.masks_dir = masks_dir
+        self.transform = transform
         self.scale = scale
 
         assert 0 < scale <= 1, 'scale must be between 0 and 1'
