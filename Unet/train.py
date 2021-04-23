@@ -16,11 +16,18 @@ from utils import *
 imgs = "../../data/covid19_chest_xray/images/"
 mask = "../../data/covid19_chest_xray/mask/"
 checkpoints = "./pretrained"
+image_size = 128
+
+transform = []
+transform.append(T.Resize(image_size))
+transform.append(T.ToTensor())
+transform.append(T.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5, 0.5, 0.5)))
+transform = T.Compose(transform)
 
 
 def Train_this_mf(net, device, epochs, batch_size, lr, val_per=.1, save_cp=True, img_scale=.5):
 
-    dataset = corona_dataset(dir_image, dir_mask, img_scale)
+    dataset = corona_dataset(dir_image, dir_mask, img_scale, transform)
 
     # train validation split
     val_set = int(len(dataset) * val_per)
@@ -36,7 +43,12 @@ def Train_this_mf(net, device, epochs, batch_size, lr, val_per=.1, save_cp=True,
     writer = SummaryWriter(comment=f"LR{lr_BS_{batch_size}_SCALE_{img_scale}}")
     global_step = 0
 
-    logging.info(f'''Starting training:
+    optimizer = optim.RMSprop(net.parameters(), lr=lr, weight_decay=1e-8, momentum=0.9)
+    scheduler = optim.lr_scheduler.ReduceLRonPlateau(optimizer, 'min' if net.n_classes > 1 
+            else "max", patience = 2)
+
+    print(f'''Starting training:
+        Net:             {net}       
         Epochs:          {epochs}
         Batch size:      {batch_size}
         Learning rate:   {lr}
@@ -46,5 +58,5 @@ def Train_this_mf(net, device, epochs, batch_size, lr, val_per=.1, save_cp=True,
         Device:          {device.type}
         Images scaling:  {img_scale} ''')
 
-
+    
 

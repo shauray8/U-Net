@@ -31,7 +31,7 @@ import matplotlib.pyplot as plt
 #logger.setLevel(logging.DEBUG)
 
 class corona_dataset(Dataset):
-    def __init__(self, imgs_dir, masks_dir, scale=1):
+    def __init__(self, imgs_dir, masks_dir, scale=1, transform):
         self.imags_dir = imgs_dir
         self.masks_dir = masks_dir
         self.scale = scale
@@ -59,11 +59,11 @@ class corona_dataset(Dataset):
         if len(img_nd.shape) == 2:
             img_nd = np.expand_dims(img_nd, axis=2)
 
-            img_trans = img_nd.transpose((2,0,1))
-            if img_Trans.max() > 1:
-                img_trans = img_trans / 255
+        img_trans = img_nd.transpose((2,0,1))
+        if img_Trans.max() > 1:
+            img_trans = img_trans / 255
 
-            return img_trans
+        return img_trans
 
     def __getitem__(self, i):
         idx = self.ids[i]
@@ -84,8 +84,8 @@ class corona_dataset(Dataset):
         mask = self.preprocess(mask, self.scale)
 
         return {
-            'image': torch.from_numpy(img).type(torch.FloatTensor),
-            'mask': torch.from_numpy(mask).type(torch.FloatTensor)
+            'image': self.transform(torch.from_numpy(img).type(torch.FloatTensor)),
+            'mask': self.transform(torch.from_numpy(mask).type(torch.FloatTensor))
         }
 
 if __name__ == "__main__":
