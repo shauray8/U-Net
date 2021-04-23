@@ -21,5 +21,5 @@ checkpoints = "./pretrained"
 
 def Train_this_mf(net, device, epochs, batch_size, lr, val_per=.1, save_cp=True, img_scale=.5):
 
-    dataset = preprocessing()
+    dataset = corona()
 
