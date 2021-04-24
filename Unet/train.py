@@ -119,19 +119,19 @@ def Train_this_mf(net, device, epochs, batch_size, lr, val_per=.1, save_cp=True,
                 writer.add_histogram('grads/' + tag, value.grad.data.cpu().numpy(),
                         global_step)
 
-            val_score = eval_net(net, val_loader, device)
-            scheduler.step(val_score)
-            writer.add_scalar('learning_rate', optimizeer.param_groups[0][lr],global_step)
+            #val_score = eval_net(net, val_loader, device)
+            #scheduler.step(val_score)
+            #writer.add_scalar('learning_rate', optimizer.param_groups[0][lr],global_step)
 
 
-            if net.n_classes > 1:
-                print('Validation cross entropy: {}'.format(val_score))
-                logging.info('Validation cross entropy: {}'.format(val_score))
-                writer.add_scalar('Loss/test', val_score, global_step)
-            else:
-                print('Validation Dice Coeff: {}'.format(val_score))
-                logging.info('Validation Dice Coeff: {}'.format(val_score))
-                writer.add_scalar('Dice/test', val_score, global_step)
+            #if net.n_classes > 1:
+            #    print('Validation cross entropy: {}'.format(val_score))
+            #    logging.info('Validation cross entropy: {}'.format(val_score))
+            #    writer.add_scalar('Loss/test', val_score, global_step)
+            #else:
+            #    print('Validation Dice Coeff: {}'.format(val_score))
+            #    logging.info('Validation Dice Coeff: {}'.format(val_score))
+            #    writer.add_scalar('Dice/test', val_score, global_step)
 
             writer.add_images('images', imgs, global_step)
             if net.n_classes == 1:
