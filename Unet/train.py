@@ -23,9 +23,9 @@ checkpoints = "./pretrained"
 image_size = 128
 
 transform = []
-transform.append(T.Resize(image_size))
-transform.append(T.ToTensor())
-transform.append(T.Normalize(mean=(0.5), std=(0.5)))
+transform.append(T.Resize(image_size, image_size))
+#transform.append(T.ToTensor())
+#transform.append(T.Normalize(mean=(0.5), std=(0.5)))
 transform = T.Compose(transform)
 
 
@@ -84,7 +84,7 @@ def Train_this_mf(net, device, epochs, batch_size, lr, val_per=.1, save_cp=True,
         with tqdm.tqdm(total=train_set, desc=f"Epoch {epoch + 1}/{epochs}", unit="img") as sigma:
             for batch in train_loader:
                 imgs = batch["image"]
-                true_mask = batch["mask"]
+                true_masks = batch["mask"]
                 assert imgs.shape[1] == net.n_channel, \
                 f'Network has been defined with {net.n_channel} input channels, ' \
                 f'but loaded images have {imgs.shape[1]} channels. Please check that ' \

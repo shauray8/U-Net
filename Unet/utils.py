@@ -23,6 +23,8 @@ import matplotlib.pyplot as plt
 #    def __getitem__(self, i):
 #        pass
 
+image_size = 64
+
 class corona_dataset(Dataset):
     def __init__(self, imgs_dir, masks_dir, scale, transform):
         self.imgs_dir = imgs_dir
@@ -45,7 +47,7 @@ class corona_dataset(Dataset):
 
     @classmethod
     def preprocess(cls, pil_image, scale):
-        _, w, h = pil_image.size
+        w, h = pil_image.size
         newW, newH = int(scale * w), int(scale * h)
         pil_image = pil_image.resize((newW, newH))
 
@@ -66,17 +68,16 @@ class corona_dataset(Dataset):
         self.mask_file = glob(self.masks_dir + idx + "_mask" + ".*")
         self.img_file = glob(self.imgs_dir + idx + ".*")
 
-        assert len(self.mask_file) == 1, \
-            f'Either no mask or multiple masks found for the ID {idx}: {self.mask_file}'
         assert len(self.img_file) == 1, \
             f'Either no image or multiple images found for the ID {idx}: {self.img_file}'
         mask = Image.open(self.mask_file[0])
         img = Image.open(self.img_file[0])
-
+        mask = mask.resize((image_size, image_size))
+        img = img.resize((image_size, image_size))
 
         print("dataset preprocessing")
-        img = self.preprocess(ImageOps.greyscale(img), self.scale)
-        mask = self.preprocess(ImageOps.greyscale(mask), self.scale)
+        img = self.preprocess(ImageOps.grayscale((img)), self.scale)
+        mask = self.preprocess(ImageOps.grayscale((mask)), self.scale)
         logging.info('dataset preprocessing')
         
         return {
