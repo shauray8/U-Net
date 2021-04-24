@@ -49,13 +49,13 @@ class corona_dataset(Dataset):
         newW, newH = int(scale * w), int(scale * h)
         pil_image = pil_image.resize((newW, newH))
 
-        img_nd = np.array(pil_img)
+        img_nd = np.array(pil_image)
 
         if len(img_nd.shape) == 2:
             img_nd = np.expand_dims(img_nd, axis=2)
 
         img_trans = img_nd.transpose((2,0,1))
-        if img_Trans.max() > 1:
+        if img_trans.max() > 1:
             img_trans = img_trans / 255
 
         
@@ -66,15 +66,13 @@ class corona_dataset(Dataset):
         self.mask_file = glob(self.masks_dir + idx + "_mask" + ".*")
         self.img_file = glob(self.imgs_dir + idx + ".*")
 
-        assert len(mask_file) == 1, \
+        assert len(self.mask_file) == 1, \
             f'Either no mask or multiple masks found for the ID {idx}: {mask_file}'
-        assert len(img_file) == 1, \
+        assert len(self.img_file) == 1, \
             f'Either no image or multiple images found for the ID {idx}: {img_file}'
-        mask = Image.open(mask_file[0])
-        img = Image.open(img_file[0])
+        mask = Image.open(self.mask_file[0])
+        img = Image.open(self.img_file[0])
 
-        assert img.size == mask.size, \
-            f'Image and mask {idx} should be the same size, but are {img.size} and {mask.size}'
 
         print("dataset preprocessing")
         img = self.preprocess(img, self.scale)
@@ -82,8 +80,8 @@ class corona_dataset(Dataset):
         logging.info('dataset preprocessing')
         
         return {
-            'image': self.transform(torch.from_numpy(img).type(torch.FloatTensor)),
-            'mask': self.transform(torch.from_numpy(mask).type(torch.FloatTensor))
+            'image': torch.from_numpy((img)).type(torch.FloatTensor),
+            'mask': torch.from_numpy((mask)).type(torch.FloatTensor)
         }
 
 if __name__ == "__main__":
