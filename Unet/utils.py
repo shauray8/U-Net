@@ -38,7 +38,7 @@ class corona_dataset(Dataset):
         
         print(len(self.ids))
         logging.info(f"Createing dataset with {len(self.ids)} example")
-        print(f"Createing dataset with {len(self.ids)} example : ")
+        print(f"Createing dataset with {len(self.ids)} example")
 
     def __len__(self):
         return len(self.ids)
@@ -63,7 +63,7 @@ class corona_dataset(Dataset):
 
     def __getitem__(self, i):
         idx = self.ids[i]
-        self.mask_file = glob(self.mask_dir + idx + "_mask" + ".*")
+        self.mask_file = glob(self.masks_dir + idx + "_mask" + ".*")
         self.img_file = glob(self.imgs_dir + idx + ".*")
 
         assert len(mask_file) == 1, \

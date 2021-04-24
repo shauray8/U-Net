@@ -1,4 +1,5 @@
 import torch
+import torch.nn as nn
 import argparse
 import logging
 from torchvision import transforms as T
@@ -7,6 +8,7 @@ import sys, os
 import numpy as np
 from torch import optim
 from tqdm import trange
+import tqdm
 
 from model import U_net
 
@@ -54,12 +56,11 @@ def Train_this_mf(net, device, epochs, batch_size, lr, val_per=.1, save_cp=True,
         loss_function = nn.BCEWithLogitsLoss()
 
     print(f'''Starting training:
-        Net:             {net}       
         Epochs:          {epochs}
         Batch size:      {batch_size}
         Learning rate:   {lr}
         Training size:   {train_set}
-        Validation size: {val_Set}
+        Validation size: {val_set}
         Checkpoints:     {save_cp}
         Device:          {device.type}
         Images scaling:  {img_scale} ''')
@@ -70,7 +71,7 @@ def Train_this_mf(net, device, epochs, batch_size, lr, val_per=.1, save_cp=True,
         Batch size:      {batch_size}
         Learning rate:   {lr}
         Training size:   {train_set}
-        Validation size: {val_Set}
+        Validation size: {val_set}
         Checkpoints:     {save_cp}
         Device:          {device.type}
         Images scaling:  {img_scale} ''')
@@ -80,7 +81,7 @@ def Train_this_mf(net, device, epochs, batch_size, lr, val_per=.1, save_cp=True,
         net.train()
 
         epoch_loss = 0
-        with tqdm(total=train_set, desc=f"Epoch {epoch + 1}/{epochs}", unit="img") as sigma:
+        with tqdm.tqdm(total=train_set, desc=f"Epoch {epoch + 1}/{epochs}", unit="img") as sigma:
             for batch in train_loader:
                 imgs = batch["image"]
                 true_mask = batch["mask"]
