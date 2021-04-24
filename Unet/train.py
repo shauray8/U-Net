@@ -175,15 +175,12 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO,filename="./log/maybe_imp.log",
             format="format='%(asctime)s --> %(levelname)s: %(message)s") 
 
-
-    device = ["cuda" if torch.cuda.is_available() else "cpu"]
+    args = get_args()
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     logging.info(f"Using device: {device}")
 
     net = U_net(n_channel=1, n_classes=1, bilinear=True)
-    logging.info(f"Network:\n"
-            f'\t{net.n_channels} input channels\n'
-            f'\t{net.n_classes} output channels (classes)\n'
-            f'\t{"Bilinear" if net.bilinear else "Transposed conv"} upscaling')
+    logging.info(f"Network:\n")
 
     if args.load:
         net.load_state_dict(
@@ -194,7 +191,7 @@ if __name__ == "__main__":
     net.to(device)
 
     try:
-        train_this_mf(net=net,
+        Train_this_mf(net=net,
                   epochs=args.epochs,
                   batch_size=args.batchsize,
                   lr=args.lr,
