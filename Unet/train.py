@@ -1,5 +1,6 @@
 import torch
 import logging
+from torchvision import transforms as T
 import sys, os
 
 import numpy as np
@@ -27,7 +28,7 @@ transform = T.Compose(transform)
 
 def Train_this_mf(net, device, epochs, batch_size, lr, val_per=.1, save_cp=True, img_scale=.5):
 
-    dataset = corona_dataset(imgs_dir=dir_image, mask_dir=dir_mask,
+    dataset = corona_dataset(imgs_dir=imags, mask_dir=mask,
             scale = img_scale, transform = transform)
 
     # train validation split

@@ -24,8 +24,8 @@ import matplotlib.pyplot as plt
 #        pass
 
 class corona_dataset(Dataset):
-    def __init__(self, imgs_dir, masks_dir, scale=1, transform):
-        self.imags_dir = imgs_dir
+    def __init__(self, imgs_dir, masks_dir, scale, transform):
+        self.imgs_dir = imgs_dir
         self.masks_dir = masks_dir
         self.transform = transform
         self.scale = scale
