@@ -5,7 +5,7 @@ from os import listdir
 from glob import glob
 import logging
 from torch.utils.data import Dataset
-from PIL import Image
+from PIL import Image, ImageOps
 import matplotlib.pyplot as plt
 
 
@@ -45,7 +45,7 @@ class corona_dataset(Dataset):
 
     @classmethod
     def preprocess(cls, pil_image, scale):
-        w, h = pil_image.size
+        _, w, h = pil_image.size
         newW, newH = int(scale * w), int(scale * h)
         pil_image = pil_image.resize((newW, newH))
 
@@ -67,16 +67,16 @@ class corona_dataset(Dataset):
         self.img_file = glob(self.imgs_dir + idx + ".*")
 
         assert len(self.mask_file) == 1, \
-            f'Either no mask or multiple masks found for the ID {idx}: {mask_file}'
+            f'Either no mask or multiple masks found for the ID {idx}: {self.mask_file}'
         assert len(self.img_file) == 1, \
-            f'Either no image or multiple images found for the ID {idx}: {img_file}'
+            f'Either no image or multiple images found for the ID {idx}: {self.img_file}'
         mask = Image.open(self.mask_file[0])
         img = Image.open(self.img_file[0])
 
 
         print("dataset preprocessing")
-        img = self.preprocess(img, self.scale)
-        mask = self.preprocess(mask, self.scale)
+        img = self.preprocess(ImageOps.greyscale(img), self.scale)
+        mask = self.preprocess(ImageOps.greyscale(mask), self.scale)
         logging.info('dataset preprocessing')
         
         return {
