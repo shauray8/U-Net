@@ -15,7 +15,7 @@ from torch.utils.data import DataLoader, random_split
 from utils import *
 
 
-imgs = "../../data/covid19_chest_xray/images/"
+imags = "../../data/covid19_chest_xray/images/"
 mask = "../../data/covid19_chest_xray/mask/"
 checkpoints = "./pretrained"
 image_size = 128
@@ -29,7 +29,7 @@ transform = T.Compose(transform)
 
 def Train_this_mf(net, device, epochs, batch_size, lr, val_per=.1, save_cp=True, img_scale=.5):
 
-    dataset = corona_dataset(imgs_dir=imags, mask_dir=mask,
+    dataset = corona_dataset(imgs_dir=imags, masks_dir=mask,
             scale = img_scale, transform = transform)
 
     # train validation split
@@ -47,8 +47,7 @@ def Train_this_mf(net, device, epochs, batch_size, lr, val_per=.1, save_cp=True,
     global_step = 0
 
     optimizer = optim.RMSprop(net.parameters(), lr=lr, weight_decay=1e-8, momentum=0.9)
-    scheduler = optim.lr_scheduler.ReduceLRonPlateau(optimizer, 'min' if net.n_classes > 1 
-            else "max", patience = 2)
+    scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, 'min' if net.n_classes > 1 else 'max', patience=2)
     if net.n_classes > 1:
         loss_function = nn.CrossEntropyLoss()
     else:
@@ -180,7 +179,6 @@ if __name__ == "__main__":
     logging.info(f"Using device: {device}")
 
     net = U_net(n_channel=1, n_classes=1, bilinear=True)
-    logging.info(f"Network:\n")
 
     if args.load:
         net.load_state_dict(
@@ -192,12 +190,11 @@ if __name__ == "__main__":
 
     try:
         Train_this_mf(net=net,
+                  device = device,  
                   epochs=args.epochs,
                   batch_size=args.batchsize,
-                  lr=args.lr,
-                  device=device,
-                  img_scale=args.scale,
-                  val_percent=args.val / 100)
+                  lr=args.lr,)
+
     except KeyboardInterrupt:
         torch.save(net.state_dict(), 'INTERRUPTED.pth')
         logging.info('Saved interrupt')

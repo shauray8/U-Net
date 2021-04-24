@@ -6,6 +6,9 @@ import torch.nn.functional as F
 class U_net(nn.Module):
     def __init__(self, n_channel, n_classes, bilinear=True):
         super(U_net, self).__init__()
+        self.n_classes = n_classes
+        self.n_channel = n_channel
+        self.bilinear = bilinear
         
         self.ini = Conv_Layer(n_channel, 64)
         self.downSam1 = Down_Sampling(64, 128)

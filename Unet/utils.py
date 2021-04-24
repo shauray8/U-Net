@@ -37,7 +37,7 @@ class corona_dataset(Dataset):
         
         
         print(len(self.ids))
-        logger.info(f"Createing dataset with {len(self.ids)} example")
+        logging.info(f"Createing dataset with {len(self.ids)} example")
         print(f"Createing dataset with {len(self.ids)} example : ")
 
     def __len__(self):
@@ -79,7 +79,7 @@ class corona_dataset(Dataset):
         print("dataset preprocessing")
         img = self.preprocess(img, self.scale)
         mask = self.preprocess(mask, self.scale)
-        logger.info('dataset preprocessing')
+        logging.info('dataset preprocessing')
         
         return {
             'image': self.transform(torch.from_numpy(img).type(torch.FloatTensor)),
