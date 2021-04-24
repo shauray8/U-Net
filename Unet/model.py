@@ -27,14 +27,14 @@ class U_net(nn.Module):
 
     def forward(self, x):
         x1 = self.ini(x)
-        x2 = self.downsam1(x1)
-        x3 = self.downsam2(x2)
-        x4 = self.downsam3(x3)
-        x5 = self.downsam4(x4)
-        x = self.upsam1(x5, x4)
-        x = self.upsam2(x, x3)
-        x = self.upsam3(x, x2)
-        x = self.upsam4(x, x1)
+        x2 = self.downSam1(x1)
+        x3 = self.downSam2(x2)
+        x4 = self.downSam3(x3)
+        x5 = self.downSam4(x4)
+        x = self.upSam1(x5, x4)
+        x = self.upSam2(x, x3)
+        x = self.upSam3(x, x2)
+        x = self.upSam4(x, x1)
         gamma = self.output(x)
         return gamma
 
@@ -90,7 +90,7 @@ class Up_Sampling(nn.Module):
 
         x = torch.cat([alpha, beta],  dim=1)
 
-        return self.cov(x)
+        return self.conv(x)
 
 class Out_Conv(nn.Module):
     def __init__(self, in_channel, out_channel):

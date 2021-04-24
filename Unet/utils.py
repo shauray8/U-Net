@@ -75,7 +75,6 @@ class corona_dataset(Dataset):
         mask = mask.resize((image_size, image_size))
         img = img.resize((image_size, image_size))
 
-        print("dataset preprocessing")
         img = self.preprocess(ImageOps.grayscale((img)), self.scale)
         mask = self.preprocess(ImageOps.grayscale((mask)), self.scale)
         logging.info('dataset preprocessing')

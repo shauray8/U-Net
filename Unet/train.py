@@ -13,13 +13,15 @@ import tqdm
 from model import U_net
 
 from torch.utils.tensorboard import SummaryWriter
+# {cmd} tensorboard --logdir=run
+
 from torch.utils.data import DataLoader, random_split
 from utils import *
 
 
 imags = "../../data/covid19_chest_xray/images/"
 mask = "../../data/covid19_chest_xray/mask/"
-checkpoints = "./pretrained"
+dir_checkpoint = "./pretrained"
 image_size = 128
 
 transform = []
@@ -81,62 +83,63 @@ def Train_this_mf(net, device, epochs, batch_size, lr, val_per=.1, save_cp=True,
         net.train()
 
         epoch_loss = 0
-        with tqdm.tqdm(total=train_set, desc=f"Epoch {epoch + 1}/{epochs}", unit="img") as sigma:
-            for batch in train_loader:
-                imgs = batch["image"]
-                true_masks = batch["mask"]
-                assert imgs.shape[1] == net.n_channel, \
-                f'Network has been defined with {net.n_channel} input channels, ' \
-                f'but loaded images have {imgs.shape[1]} channels. Please check that ' \
-                'the images are loaded correctly.'
-            
-            imgs = imgs.to(device=device, dtype=torch.float32)
-            mask_type = torch.float32 if net.n_classes == 1 else torch.long
-            true_masks = true_masks.to(device, dtype=mask_type)
+        #with tqdm.tqdm(total=train_set, desc=f"Epoch {epoch + 1}/{epochs}", unit="img") as sigma:
+        for batch in train_loader:
+            imgs = batch["image"]
+            true_masks = batch["mask"]
+            assert imgs.shape[1] == net.n_channel, \
+            f'Network has been defined with {net.n_channel} input channels, ' \
+            f'but loaded images have {imgs.shape[1]} channels. Please check that ' \
+            'the images are loaded correctly.'
+        
+        imgs = imgs.to(device=device, dtype=torch.float32)
+        mask_type = torch.float32 if net.n_classes == 1 else torch.long
+        true_masks = true_masks.to(device, dtype=mask_type)
 
-            masks_pred = net(imgs)
-            loss = loss_function(masks_pred, trye_masks)
-            epoch_loss += loss.item()
-            writer.add_scalar("loss/train", loss.item(), global_step)
+        masks_pred = net(imgs)
+        loss = loss_function(masks_pred, true_masks)
+        epoch_loss += loss.item()
+        writer.add_scalar("loss/train", loss.item(), global_step)
 
-            pbar.set_postfix(**{"loss (batch)" : loss.item()})
+        #sigma.set_postfix(**{"loss (batch)" : loss.item()})
 
-            optimizer.zero_grad()
-            loss.backward()
-            nn.utils.clip_grad_value_(net.parameters(), 0.1)
-            optimizer.step()
+        optimizer.zero_grad()
+        loss.backward()
+        nn.utils.clip_grad_value_(net.parameters(), 0.1)
+        optimizer.step()
 
-            pbar.update(imgs.shape[0])
-            global_step += 1
+        #sigma.update(imgs.shape[0])
+        global_step += 1
 
-            if global_step % batch_size == 0:
-                for tag, value in net.named_parameters():
-                    tag = tag.replace(".","/")
-                    writer.add_histogram('weights/' + tag, value.data.cpu().numpy(),
-                            global_step)
-                    writer.add_histogram('grads/' + tag, value.grad.data.cpu().numpy(),
-                            global_step)
+        if batch_size % batch_size == 0:
+            for tag, value in net.named_parameters():
+                tag = tag.replace(".","/")
+                writer.add_histogram('weights/' + tag, value.data.cpu().numpy(),
+                        global_step)
+                writer.add_histogram('grads/' + tag, value.grad.data.cpu().numpy(),
+                        global_step)
 
-                val_score = eval_net(net, val_loader, device)
-                scheduler.step(val_score)
-                writer.add_scalar('learning_rate', optimizeer.param_groups[0][lr],global_step)
+            val_score = eval_net(net, val_loader, device)
+            scheduler.step(val_score)
+            writer.add_scalar('learning_rate', optimizeer.param_groups[0][lr],global_step)
 
 
-                if net.n_classes > 1:
-                    print('Validation cross entropy: {}'.format(val_score))
-                    logging.info('Validation cross entropy: {}'.format(val_score))
-                    writer.add_scalar('Loss/test', val_score, global_step)
-                else:
-                    print('Validation Dice Coeff: {}'.format(val_score))
-                    logging.info('Validation Dice Coeff: {}'.format(val_score))
-                    writer.add_scalar('Dice/test', val_score, global_step)
+            if net.n_classes > 1:
+                print('Validation cross entropy: {}'.format(val_score))
+                logging.info('Validation cross entropy: {}'.format(val_score))
+                writer.add_scalar('Loss/test', val_score, global_step)
+            else:
+                print('Validation Dice Coeff: {}'.format(val_score))
+                logging.info('Validation Dice Coeff: {}'.format(val_score))
+                writer.add_scalar('Dice/test', val_score, global_step)
 
-                writer.add_images('images', imgs, global_step)
-                if net.n_classes == 1:
-                    writer.add_images('masks/true', true_masks, global_step)
-                    writer.add_images('masks/pred', torch.sigmoid(masks_pred) > 0.5,
-                            global_step)
+            writer.add_images('images', imgs, global_step)
+            if net.n_classes == 1:
+                writer.add_images('masks/true', true_masks, global_step)
+                writer.add_images('masks/pred', torch.sigmoid(masks_pred) > 0.5,
+                        global_step)
 
+        l.set_description(f"loss: {loss.item()}, epoch: {epoch+1}")
         if save_cp:
             try:
                 os.mkdir(dir_checkpoint)
@@ -145,10 +148,9 @@ def Train_this_mf(net, device, epochs, batch_size, lr, val_per=.1, save_cp=True,
             except OSError:
                 pass
             torch.save(net.state_dict(),
-                   dir_checkpoint + f'CP_epoch{epoch + 1}.pth')
+                f'{dir_checkpoint}/CP_epoch{epoch + 1}.pth')
             logging.info(f'Checkpoint {epoch + 1} saved !')
-            print(f'Checkpoint {epoch + 1} saved !')
-
+            #print(f'Checkpoint {epoch + 1} saved !')
     writer.close()
 
 
@@ -198,7 +200,7 @@ if __name__ == "__main__":
                   lr=args.lr,)
 
     except KeyboardInterrupt:
-        torch.save(net.state_dict(), 'INTERRUPTED.pth')
+        torch.save(net.state_dict(), './pretrained/INTERRUPTED.pth')
         logging.info('Saved interrupt')
         try:
             sys.exit(0)
