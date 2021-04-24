@@ -89,4 +89,4 @@ class corona_dataset(Dataset):
 if __name__ == "__main__":
     imgs = "../../data/covid19_chest_xray/images/"
     mask = "../../data/covid19_chest_xray/mask/"
-    corona_dataset(imgs, mask)  
+    #corona_dataset(imgs, mask, 1, transform)  

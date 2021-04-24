@@ -1,4 +1,5 @@
 import torch
+import argparse
 import logging
 from torchvision import transforms as T
 import sys, os
@@ -150,9 +151,60 @@ def Train_this_mf(net, device, epochs, batch_size, lr, val_per=.1, save_cp=True,
 
     writer.close()
 
-''' dfsdfsdvsdf '''
+
+
+def get_args():
+    parser = argparse.ArgumentParser(description='Train the UNet on images and target masks',
+                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('-e', '--epochs', metavar='E', type=int, default=100,
+                        help='Number of epochs', dest='epochs')
+    parser.add_argument('-b', '--batch-size', metavar='B', type=int, nargs='?', default=32,
+                        help='Batch size', dest='batchsize')
+    parser.add_argument('-l', '--learning-rate', metavar='LR', type=float, nargs='?', default=0.0001,
+                        help='Learning rate', dest='lr')
+    parser.add_argument('-f', '--load', dest='load', type=str, default=False,
+                        help='Load model from a .pth file')
+    parser.add_argument('-s', '--scale', dest='scale', type=float, default=0.5,
+                        help='Downscaling factor of the images')
+    parser.add_argument('-v', '--validation', dest='val', type=float, default=10.0,
+                        help='Percent of the data that is used as validation (0-100)')
+
+    return parser.parse_args()
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO,filename="./log/maybe_imp.log",
-            format="%(levelname)s: %(message)s") 
+            format="format='%(asctime)s --> %(levelname)s: %(message)s") 
 
+
+    device = ["cuda" if torch.cuda.is_available() else "cpu"]
+    logging.info(f"Using device: {device}")
+
+    net = U_net(n_channel=1, n_classes=1, bilinear=True)
+    logging.info(f"Network:\n"
+            f'\t{net.n_channels} input channels\n'
+            f'\t{net.n_classes} output channels (classes)\n'
+            f'\t{"Bilinear" if net.bilinear else "Transposed conv"} upscaling')
+
+    if args.load:
+        net.load_state_dict(
+            torch.load(args.load, map_location=device)
+        )
+        logging.info(f'Model loaded from {args.load}')
+
+    net.to(device)
+
+    try:
+        train_this_mf(net=net,
+                  epochs=args.epochs,
+                  batch_size=args.batchsize,
+                  lr=args.lr,
+                  device=device,
+                  img_scale=args.scale,
+                  val_percent=args.val / 100)
+    except KeyboardInterrupt:
+        torch.save(net.state_dict(), 'INTERRUPTED.pth')
+        logging.info('Saved interrupt')
+        try:
+            sys.exit(0)
+        except SystemExit:
+            os._exit(0)
