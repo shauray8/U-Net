@@ -85,10 +85,9 @@ class corona_dataset(Dataset):
         }
 
 
-def eval(net, loader, device):
+def eval_net(net, loader, device):
     net.eval()
     mask_type = torch.float32 if net.n_classes == 1 else torch.long
-    n_val = len(loader)  
     tot = 0
     
     for batch in loader:
@@ -107,7 +106,7 @@ def eval(net, loader, device):
             #tot += dice_coeff(pred, true_masks).item()
 
     net.train()
-    return tot / n_val
+    return tot 
 
 if __name__ == "__main__":
     imgs = "../../data/covid19_chest_xray/images/"

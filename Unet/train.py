@@ -119,19 +119,18 @@ def Train_this_mf(net, device, epochs, batch_size, lr, val_per=.1, save_cp=True,
                 writer.add_histogram('grads/' + tag, value.grad.data.cpu().numpy(),
                         global_step)
 
-            #val_score = eval_net(net, val_loader, device)
-            #scheduler.step(val_score)
-            #writer.add_scalar('learning_rate', optimizer.param_groups[0][lr],global_step)
+            val_score = eval_net(net, validation_loader, device)
+            scheduler.step(val_score)
+            writer.add_scalar('learning_rate', optimizer.param_groups[0]['lr'],global_step)
 
 
-            #if net.n_classes > 1:
-            #    print('Validation cross entropy: {}'.format(val_score))
-            #    logging.info('Validation cross entropy: {}'.format(val_score))
-            #    writer.add_scalar('Loss/test', val_score, global_step)
-            #else:
-            #    print('Validation Dice Coeff: {}'.format(val_score))
-            #    logging.info('Validation Dice Coeff: {}'.format(val_score))
-            #    writer.add_scalar('Dice/test', val_score, global_step)
+            if net.n_classes > 1:
+                print('Validation cross entropy: {}'.format(val_score))
+                logging.info('Validation cross entropy: {}'.format(val_score))
+                writer.add_scalar('Loss/test', val_score, global_step)
+            else:
+                logging.info('Validation: {}'.format(val_score))
+                writer.add_scalar('Dice/test', val_score, global_step)
 
             writer.add_images('images', imgs, global_step)
             if net.n_classes == 1:
@@ -139,7 +138,7 @@ def Train_this_mf(net, device, epochs, batch_size, lr, val_per=.1, save_cp=True,
                 writer.add_images('masks/pred', torch.sigmoid(masks_pred) > 0.5,
                         global_step)
 
-        l.set_description(f"loss: {loss.item()}, epoch: {epoch+1}")
+        l.set_description(f"loss: {loss.item()}, epoch: {epoch+1}, validation loss: {val_score}")
         if save_cp:
             try:
                 os.mkdir(dir_checkpoint)
