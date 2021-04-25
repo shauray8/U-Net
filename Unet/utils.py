@@ -84,6 +84,31 @@ class corona_dataset(Dataset):
             'mask': torch.from_numpy((mask)).type(torch.FloatTensor)
         }
 
+
+def eval(net, loader, device):
+    net.eval()
+    mask_type = torch.float32 if net.n_classes == 1 else torch.long
+    n_val = len(loader)  
+    tot = 0
+    
+    for batch in loader:
+        imgs, true_masks = batch['image'], batch['mask']
+        imgs = imgs.to(device=device, dtype=torch.float32)
+        true_masks = true_masks.to(device=device, dtype=mask_type)
+
+        with torch.no_grad():
+            mask_pred = net(imgs)
+
+        if net.n_classes > 1:
+            tot += F.cross_entropy(mask_pred, true_masks).item()
+        else:
+            pred = torch.sigmoid(mask_pred)
+            pred = (pred > 0.5).float()
+            #tot += dice_coeff(pred, true_masks).item()
+
+    net.train()
+    return tot / n_val
+
 if __name__ == "__main__":
     imgs = "../../data/covid19_chest_xray/images/"
     mask = "../../data/covid19_chest_xray/mask/"
